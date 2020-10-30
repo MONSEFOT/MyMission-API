@@ -18,26 +18,17 @@ use Illuminate\Support\Facades\Route;
 */
 Route::namespace('App\Http\Controllers\api')->group(function(){
     Route::middleware('api' , 'checkPassword')->group(function(){
-        Route::put('register' , 'UserController@register');//in user register api you musn't be authenticated for register
+        Route::post('register' , 'UserController@register');//in user register api you musn't be authenticated for register
         Route::post('login' , 'UserController@login');
+        Route::get('searchForUser' , 'UserController@searchForUser');
     });
 
     Route::middleware('auth:api' , 'checkPassword')->group(function(){
         Route::post('updateUser' , 'UserController@updateUser');
-        Route::delete('deleteUser' , 'UserController@deleteUser');
-        Route::get('searchForUser' , 'UserController@searchForUser');
+        Route::post('deleteUser' , 'UserController@deleteUser');
         Route::get('roleValidator', 'UserController@roleValidator');
+        Route::post('findUserWithToken' , 'UserController@findUserWithToken');
     });
-});
-
-/*
- Task API
-*/
-Route::middleware('auth:api' , 'checkPassword')->namespace('App\Http\Controllers\api')->group(function(){
-    Route::post('createTask' , 'TaskController@createTask');
-    Route::post('updateTask' , 'TaskController@updateTask');
-    Route::delete('deleteTask' , 'TaskController@delete');
-    Route::get('getUserTasks' , 'TaskController@getUserTasks');
 });
 
 /*
@@ -45,10 +36,11 @@ Route::middleware('auth:api' , 'checkPassword')->namespace('App\Http\Controllers
 */
 
 Route::middleware('auth:api' , 'checkPassword')->namespace('App\Http\Controllers\api')->group(function(){
-    Route::put('createChallenge' , 'ChallengeController@createChallenge');
+    Route::post('createChallenge' , 'ChallengeController@createChallenge');
     Route::post('updateChallenge' , 'ChallengeController@updateChallenge');
-    Route::post('updateChallengePoints' , 'ChallengeController@updateChallengePoints');
-    Route::delete('deleteChallenge' , 'ChallengeController@deleteChallenge');
+    Route::post('deleteChallenge' , 'ChallengeController@deleteChallenge');
+    Route::get('getChallenge' , 'ChallengeController@getChallenge');
+    Route::get('getTrandingChallenges' , 'ChallengeController@getTrandingChallenges');
 });
 
 
@@ -56,19 +48,19 @@ Route::middleware('auth:api' , 'checkPassword')->namespace('App\Http\Controllers
   Session API
 */
 Route::middleware('auth:api' , 'checkPassword')->namespace('App\Http\Controllers\api')->group(function(){
-    Route::put('createSession' , 'SessionController@createSession');
-    Route::get('getAllSessions' , 'SessionController@getAllSessions');
+    Route::post('createSession' , 'SessionController@createSession');
+    Route::get('getAllSessions' , 'SessionController@getChallengeSession');
     Route::post('updateSessionPoints' , 'SessionController@updateSessionPoints');
-    Route::delete('deleteSession' , 'SessionController@deleteSession');
-    Route::delete('deleteAllSessions' , 'SessionController@deleteAllSessions');
+    Route::post('deleteSession' , 'SessionController@deleteSession');
+    Route::post('deleteAllSessions' , 'SessionController@deleteAllSessions');
 });
 
 /*
   Base Task API
 */
 Route::middleware('auth:api' , 'checkPassword')->namespace('App\Http\Controllers\api')->group(function(){
-    Route::put('createBaseTask' , 'BaseTaskController@createBaseTask');
+    Route::post('createBaseTask' , 'BaseTaskController@createBaseTask');
     Route::post('updateBaseTaskPoints' , 'BaseTaskController@updateBaseTaskPoints');
     Route::get('getBaseTasks' , 'BaseTaskController@getBaseTasks');
-    Route::delete('deleteBaseTasks' , 'BaseTaskController@deleteBaseTasks');
+    Route::post('deleteBaseTasks' , 'BaseTaskController@deleteBaseTasks');
 });

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\Controller;
-use App\Models\Challenge;
 use App\Models\Session;
 use App\Traits\GeneralTrait;
 use Illuminate\Http\Request;
@@ -23,7 +22,7 @@ class SessionController extends Controller
             'number' => 'required|integer',
             'unLock_date' => 'required|string',
             'challenge_id' => 'required|integer',
-            'week_number' => 'required|integer|min:1',
+            'week_number' => 'required|integer|min:1|max:9',
             'unLock_date' => 'required|string',
         ];
 
@@ -35,19 +34,20 @@ class SessionController extends Controller
             $inputs = $request->input();
 
             try {
-                $result = DB::table('sessions')->insert([
+                DB::table('sessions')->insert([
                     'number' => $inputs['number'],
                     'unLock_date' => $inputs['unLock_date'],
                     'challenge_id' => $inputs['challenge_id'],
                     'week_number' => $inputs['week_number'],
-                    'unLock_date' => $inputs['unLock_date'],
                 ]);
-                
-                if(!$result){
-                    return $this->retunrData('creating' , false);
+
+                $sessions = DB::table('sessions')->where('number', $inputs['number'])->where('unLock_date', $inputs['unLock_date'])->where('challenge_id', $inputs['challenge_id'])->where('week_number' , $inputs['week_number'])->get();
+
+                if(!$sessions){
+                    return $this->returnError('' , 'session not created');
                 }
 
-                return $this->returnData('creating' , true);
+                return $this->returnData('session' , $sessions[0]);
             } catch (\Throwable $th) {
                 return $this->returnError('', $th->getMessage());
             }
@@ -108,7 +108,7 @@ class SessionController extends Controller
     }
 
 
-    public function getAllSessions(Request $request)
+    public function getChallengeSession(Request $request)
     {
         $rules = [
             'challenge_id' => 'required|integer',
@@ -122,19 +122,19 @@ class SessionController extends Controller
             $inputs = $request->input();
 
             try {
-                $sessions = DB::table('sessions')->where('challenge_id', $inputs['challenge_id'])->get();
+                $session = DB::table('sessions')->where('challenge_id', $inputs['challenge_id'])->get();
 
-                if (!$sessions) {
-                    return $this->returnError('', 'no sessions founed');
+                if (!$session) {
+                    return $this->returnError('', 'no session founed');
                 }
 
-                return $this->returnData('sessions', $sessions);
+                return $this->returnData('session', $session[0]);
             } catch (\Throwable $th) {
                 return $this->returnError('', $th->getMessage());
             }
         }
     }
-    
+
     public function updateSessionPoints(Request $request)
     {
         $rules = [

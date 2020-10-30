@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Challenge;
+use App\Models\Session;
 use App\Traits\GeneralTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ class ChallengeController extends Controller
 
     protected $userController;
 
-    public function __construct(UserController $userController, SessionController $sessionController)
+    public function __construct(UserController $userController)
     {
         $this->userController = $userController;
     }
@@ -41,15 +41,17 @@ class ChallengeController extends Controller
                     'hero_instagram' => $inputs['hero_instagram'],
                     'hero_target' => $inputs['hero_target'],
                     'user_id' => $inputs['user_id'],
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
                 ]);
 
-                $challenge = DB::table('challenges')->where('hero_instagram', $inputs['hero_instagram'])->where('hero_target', $inputs['hero_target'])->where('user_id', $inputs['user_id'])->get();
-                
-                if(!$challenge){
+                $challenges= DB::table('challenges')->where('hero_instagram', $inputs['hero_instagram'])->where('hero_target', $inputs['hero_target'])->where('user_id', $inputs['user_id'])->get();
+
+                if(!$challenges){
                     return $this->returnError('' , 'challenge not found');
                 }
 
-                return $this->returnData('challenge', $challenge[0]);
+                return $this->returnData('challenge', $challenges[0]);
             } catch (\Throwable $th) {
                 return $this->returnError('', $th->getMessage());
             }
@@ -63,10 +65,11 @@ class ChallengeController extends Controller
             'id' => 'required|integer',
             'hero_instagram' => 'required|string',
             'hero_target' => 'required|string',
-            'points' => 'required|integer|max:2', 
-            'in_leader_board' => 'required|string',
-            'is_verefied' => 'required|string',
+            'points' => 'required|integer|max:2',
+            'in_leader_board' => 'required|boolean',
+            'is_verefied' => 'required|boolean',
             'user_id' => 'required|integer',
+            'created_at' => 'required|string',
         ];
 
         $validation = validator()->make($request->all(), $rules);
@@ -82,14 +85,17 @@ class ChallengeController extends Controller
                     'hero_instagram' => $inputs['hero_instagram'],
                     'hero_target' => $inputs['hero_target'],
                     'points' => $inputs['points'],
-                    'in_leader_board' => ($inputs['in_leader_board'] == "true")? true : false,
-                    'is_verefied' => ($inputs['is_verefied'] == "true")? true : false,
+                    'in_leader_board' => $inputs['in_leader_board'],
+                    'is_verefied' => $inputs['is_verefied'],
+                    'created_at' => $inputs['created_at'],
+                    'updated_at' => date('Y-m-d H:i:s'),
                 ]);
-                
+
+
                 if(!$result){
                     return $this->returnData('updating' , false);
                 }
-                
+
                 return $this->returnData('updating', true);
             } catch (\Throwable $th) {
                 return $this->returnError('', $th->getMessage());
@@ -128,7 +134,6 @@ class ChallengeController extends Controller
     {
 
         $rules = [
-            'challenge_id' => 'required|integer',
             'user_id' => 'required|integer',
         ];
 
@@ -138,7 +143,7 @@ class ChallengeController extends Controller
         } else {
             $inputs  = $request->input();
             try {
-                $challenges = DB::table('challenges')->where('id', $inputs['challenge_id'])->where('user_id', $inputs['user_id'])->get();
+                $challenges = DB::table('challenges')->where('user_id', $inputs['user_id'])->get();
 
                 if (!$challenges) {
                     $this->returnError('' , 'challenge not found');
@@ -149,31 +154,54 @@ class ChallengeController extends Controller
             }
         }
     }
-    
+
     public function getTrandingChallenges(Request $request){
         $rules = [
-            'last_id' => 'required|integer',
-            
+            'last_points' => 'integer',
+
         ];
-        
+
          $validation = validator()->make($request->all(), $rules);
         if (!$validation) {
             return $this->returnValidationError($validation);
         } else {
             $inputs  = $request->input();
+
             try {
-                $challenges = DB::table('challenges')->where('id'  , '>' , $inputs['last_id'])->where('id' , '<=' , $inputs['last_id'] + 15)->where('in_leader_board' , true)->get();
-                
+
+                if($inputs['last_points'] > 0){
+                    $challenges = DB::table('challenges')->where('in_leader_board' , 1)->where('points' , '<' , $inputs['last_points'])->orderByDesc('points')->take(15)->get();
+                }else{
+                    $challenges = DB::table('challenges')->where('in_leader_board' , 1)->orderByDesc('points')->take(15)->get();
+                    }
+
+
                 if(!$challenges){
                     return $this->returnError('' , 'page not found');
                 }
-                
-                return $this->returnData('challenges' , $challenges);
+
+                    return $this->returnData('challenges' , $challenges);
 
             } catch (\Throwable $th) {
                 return $th->getMessage();
             }
         }
-    } 
+    }
 
+    private function choosingTheChallengeTime(){
+        $date = date('m');
+
+        if($date <= 2){
+            return date('Y-m-d' , strtotime(date('Y').'-2-1'));
+        }else
+        if($date <= 5){
+            return date('Y-m-d' , strtotime(date('Y').'-5-1'));
+        }
+        if($date <= 8){
+            return date('Y-m-d' , strtotime(date('Y').'-8-1'));
+        }
+        if($date <= 11){
+            return date('Y-m-d' , strtotime(date('Y').'-11-1'));
+        }
+    }
 }

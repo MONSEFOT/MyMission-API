@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\Controller;
 use App\Models\BaseTask;
 use App\Traits\GeneralTrait;
@@ -33,7 +32,7 @@ class BaseTaskController extends Controller
                     'title' => $inputs['title'],
                     'session_id' => $inputs['session_id'],
                 ]);
-                
+
                 if(!$result){
                     return $this->returnData('creating' , false);
                 }
@@ -60,34 +59,34 @@ class BaseTaskController extends Controller
 
             try {
                 $base_task = BaseTask::find($inputs['id']);
-                
+
                 if(!$base_task){
                     return $this->returnError('' , 'Base task not found ');
                 }
 
                 if(($base_task->points + $inputs['points']) > 0){
                     $result = DB::table('base_tasks')->where('id', $inputs['id'])->update(['points' => ($base_task->points + $inputs['points']) , 'complete_state' => true]);
-                    
+
                     if(!$result){
                         return $this->returnData('baseTask' , 'base task  not fount');
                     }
                     $base_task = BaseTask::find($inputs['id']);
-                    
-                    
+
+
                     return $this->returnData('baseTask' , $base_task);
                 }else if (($base_task->points + $inputs['points']) == 0){
                     $result = DB::table('base_tasks')->where('id', $inputs['id'])->update(['points' => ($base_task->points + $inputs['points']) , 'complete_state' => false]);
-                    
+
                     if(!$result){
                         return $this->returnData('baseTask' , 'base task  not fount');
                     }
                     $base_task = BaseTask::find($inputs['id']);
-                    
-                    
+
+
                     return $this->returnData('baseTask' , $base_task);
                 }
-                   
-                   
+
+
             } catch (\Throwable $th) {
                 return $this->returnError('' , $th->getMessage());
             }
@@ -99,7 +98,7 @@ class BaseTaskController extends Controller
     {
 
         $rules = [
-            'session_id',
+            'session_id' => 'required|integer',
         ];
 
         $validation = validator()->make($request->all() , $rules);

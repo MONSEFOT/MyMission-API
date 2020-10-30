@@ -20,7 +20,7 @@ class CreateChallengesTable extends Migration
             $table->integer('points')->default(0);
             $table->boolean('in_leader_board')->default(false);
             $table->boolean('is_verefied')->default(false);
-
+            $table->timestamps();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
         });

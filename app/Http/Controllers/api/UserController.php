@@ -84,6 +84,7 @@ class UserController extends Controller
             'display_name' => 'required|string|min:5|max:255',
             'social_id' => 'required|string|max:255',
             'password' => 'required|string|min:6|max:255',
+
         ];
 
         $validation = validator()->make($request->all(), $rules);
@@ -102,6 +103,8 @@ class UserController extends Controller
                     'password' => bcrypt($inputs['password']),
                     'role' => 'hero',
                     'is_banned' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
                     ]);
 
 
@@ -122,7 +125,8 @@ class UserController extends Controller
             'social_id' => 'required|string|max:255',
             'password' => 'required|string|min:6|max:255',
             'role' => 'string',
-            'is_banned' => 'string',
+            'is_banned' => 'boolean',
+            'created_at' => 'required|string',
         ];
 
         $validation = validator()->make($request->all(), $rules);
@@ -142,7 +146,9 @@ class UserController extends Controller
                     'social_id' => $inputs['social_id'],
                     'password' => $inputs['password'],
                     'role' => $inputs['role'],
-                    'is_banned' => ($inputs['is_banned'] == "true") ? true : false,
+                    'is_banned' => $inputs['is_banned'],
+                    'created_at' => $inputs['created_at'],
+                    'updated_at' => date('Y-m-d H:i:s'),
                     ]);
 
 
@@ -207,7 +213,7 @@ class UserController extends Controller
     public function findUserWithToken(Request $request)
     {
         $rules = [
-            'response' => 'string'
+            'response' => 'boolean'
         ];
 
 
@@ -215,7 +221,7 @@ class UserController extends Controller
 
         if ($validation->fails()) {
             return $this->returnValidationError($validation);
-        } 
+        }
         else{
             $inputs = $request->input();
             try {
@@ -225,14 +231,14 @@ class UserController extends Controller
                     return $this->returnError('E003', 'User not found');
                 }
 
-                if($inputs['response'] == "true"){
+                if($inputs['response']){
                     return $this->returnData('user' , $user);
                 }
                 else{
                     return $user;
                 }
 
-                
+
             } catch (\Throwable $th) {
                 return $this->returnError('E003', $th->getMessage());
             }
@@ -244,9 +250,9 @@ class UserController extends Controller
 
         $rules = [
             'display_name' => 'string',
-            'with_social_id' => 'required|string',
-            'social_id' => 'string',
-        ];  
+            'with_social_id' => 'required|boolean',
+            'social_id' => 'integer',
+        ];
 
 
         $validation = validator()->make($request->all(), $rules);
@@ -262,7 +268,7 @@ class UserController extends Controller
                 else{
                     $users = DB::table('users')->where('display_name', 'like', '%' . $inputs['display_name'] . '%')->get();
                 }
-                
+
                 if (!$users) {
                     return $this->returnError('', 'User not found');
                 }

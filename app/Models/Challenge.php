@@ -17,6 +17,6 @@ class Challenge extends Model
      * @var array
      */
     protected $fillable = [
-        'id' , 'hero_instagram' , 'hero_target' , 'points' , 'in_leader_board' , 'is_verefied' , 'user_id'
+        'id' , 'hero_instagram' , 'hero_target' , 'points' , 'in_leader_board' , 'is_verefied' , 'user_id' , 'created_at' , 'updated_at',
     ];
 }
