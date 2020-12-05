@@ -20,7 +20,7 @@ Route::namespace('App\Http\Controllers\api')->group(function(){
     Route::middleware('api' , 'checkPassword')->group(function(){
         Route::post('register' , 'UserController@register');//in user register api you musn't be authenticated for register
         Route::post('login' , 'UserController@login');
-        Route::get('searchForUser' , 'UserController@searchForUser');
+        Route::post('searchForUser' , 'UserController@searchForUser');
     });
 
     Route::middleware('auth:api' , 'checkPassword')->group(function(){

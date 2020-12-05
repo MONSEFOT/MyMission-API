@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('display_name');
             $table->string('social_id')->unique();
             $table->string('password');
+            $table->boolean('is_banned');
             $table->string('role')->default('hero');
             $table->timestamps();
 

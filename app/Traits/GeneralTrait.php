@@ -20,7 +20,7 @@ trait GeneralTrait
     }
 
 
-    public function returnSuccessMessage($msg = "", $errNum = "S000")
+    public function returnSuccessMessage($msg = "", $errNum = "E000")
     {
         return response()->json([
             'status' => true,

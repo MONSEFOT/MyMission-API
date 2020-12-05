@@ -1,5 +1,3 @@
-
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -11,6 +9,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `social_id` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` varchar(255) NOT NULL DEFAULT 'hero',
+  `created_at` TIMESTAMP , 
+  `updated_at` TIMESTAMP ,
   `is_banned` tinyint(4) NOT NULL DEFAULT false,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_social_id_unique` (`social_id`)
@@ -23,9 +23,10 @@ CREATE TABLE IF NOT EXISTS `challenges` (
   `points` int(11) NOT NULL DEFAULT 0,
   `in_leader_board` tinyint(1) NOT NULL DEFAULT 0,
   `is_verefied` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP ,
+  `updated_at` TIMESTAMP ,
   `user_id` bigint(20) UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `challenges_hero_instagram_unique` (`hero_instagram`),
+  PRIMARY KEY (`id`),	
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -62,11 +63,4 @@ INSERT IGNORE INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2014_10_12_000000_create_users_table', 1),
 (2, '2020_09_20_084154_create_challenges_table', 1),
 (3, '2020_09_20_084834_create_sessions_table', 1),
-(4, '2020_09_20_084921_create_base_tasks_table', 1);
-
-
-
-
-INSERT IGNORE INTO `users` (`id`, `display_name`, `socail_id`, `password`, `role`) VALUES
-(2, 'Monsef OT', 'mmbdccfvzs5555115', '$2y$10$9YPrAC6VjleML.QUv4VY1uP6EdUeH2PUjmO6C0RPtSHT5QwzYQDla', 'hero');
-
+(4, '2020_09_20_084921_create_base_tasks_table', 1);	

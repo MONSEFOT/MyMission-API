@@ -45,10 +45,10 @@ class ChallengeController extends Controller
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
 
-                $challenges= DB::table('challenges')->where('hero_instagram', $inputs['hero_instagram'])->where('hero_target', $inputs['hero_target'])->where('user_id', $inputs['user_id'])->get();
+                $challenges = DB::table('challenges')->where('hero_instagram', $inputs['hero_instagram'])->where('hero_target', $inputs['hero_target'])->where('user_id', $inputs['user_id'])->get();
 
-                if(!$challenges){
-                    return $this->returnError('' , 'challenge not found');
+                if (!$challenges) {
+                    return $this->returnError('', 'challenge not found');
                 }
 
                 return $this->returnData('challenge', $challenges[0]);
@@ -70,6 +70,7 @@ class ChallengeController extends Controller
             'is_verefied' => 'required|boolean',
             'user_id' => 'required|integer',
             'created_at' => 'required|string',
+            'leaderBoardAdmin' => 'boolean|default:false',
         ];
 
         $validation = validator()->make($request->all(), $rules);
@@ -80,20 +81,34 @@ class ChallengeController extends Controller
             $inputs = $request->input();
 
             try {
-                $result = DB::table('challenges')->where('id', $inputs['id'])->where('user_id', $inputs['user_id'])->update([
-                    'id' => $inputs['id'],
-                    'hero_instagram' => $inputs['hero_instagram'],
-                    'hero_target' => $inputs['hero_target'],
-                    'points' => $inputs['points'],
-                    'in_leader_board' => $inputs['in_leader_board'],
-                    'is_verefied' => $inputs['is_verefied'],
-                    'created_at' => $inputs['created_at'],
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
+                if ($inputs['leaderBoardAdmin']) {
+                    $result = DB::table('challenges')->where('id', $inputs['id'])-> update([
+                        'id' => $inputs['id'],
+                        'hero_instagram' => $inputs['hero_instagram'],
+                        'hero_target' => $inputs['hero_target'],
+                        'points' => $inputs['points'],
+                        'in_leader_board' => $inputs['in_leader_board'],
+                        'is_verefied' => $inputs['is_verefied'],
+                        'created_at' => $inputs['created_at'],
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+                else{
+                    $result = DB::table('challenges')->where('id', $inputs['id'])->where('user_id', $inputs['user_id'])->update([
+                        'id' => $inputs['id'],
+                        'hero_instagram' => $inputs['hero_instagram'],
+                        'hero_target' => $inputs['hero_target'],
+                        'points' => $inputs['points'],
+                        'in_leader_board' => $inputs['in_leader_board'],
+                        'is_verefied' => $inputs['is_verefied'],
+                        'created_at' => $inputs['created_at'],
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
 
 
-                if(!$result){
-                    return $this->returnData('updating' , false);
+                if (!$result) {
+                    return $this->returnData('updating', false);
                 }
 
                 return $this->returnData('updating', true);
@@ -145,23 +160,26 @@ class ChallengeController extends Controller
             try {
                 $challenges = DB::table('challenges')->where('user_id', $inputs['user_id'])->get();
 
-                if (!$challenges) {
-                    $this->returnError('' , 'challenge not found');
+                if (count($challenges) > 0) {
+                    return $this->returnData('challenge', $challenges[0]);
+                } else {
+                    return $this->returnError('', 'challenge not found !!');
                 }
-                return $this->returnData('challenge' , $challenges[0]);
             } catch (\Throwable $th) {
                 return $th->getMessage();
             }
         }
     }
 
-    public function getTrandingChallenges(Request $request){
+    public function getTrandingChallenges(Request $request)
+    {
         $rules = [
-            'last_points' => 'integer',
+            'last_id' =>'required|integer',
+            'last_points' => 'required|integer',
 
         ];
 
-         $validation = validator()->make($request->all(), $rules);
+        $validation = validator()->make($request->all(), $rules);
         if (!$validation) {
             return $this->returnValidationError($validation);
         } else {
@@ -169,39 +187,39 @@ class ChallengeController extends Controller
 
             try {
 
-                if($inputs['last_points'] > 0){
-                    $challenges = DB::table('challenges')->where('in_leader_board' , 1)->where('points' , '<' , $inputs['last_points'])->orderByDesc('points')->take(15)->get();
-                }else{
-                    $challenges = DB::table('challenges')->where('in_leader_board' , 1)->orderByDesc('points')->take(15)->get();
-                    }
-
-
-                if(!$challenges){
-                    return $this->returnError('' , 'page not found');
+                if ($inputs['last_id'] > 0 && $inputs['last_points'] > 0) {
+                    $challenges = DB::table('challenges')->where('in_leader_board', 1)->where('points', '<=', $inputs['last_points'])->where('id' , '!=' , $inputs['last_id'])->orderByDesc('points')->take(15)->get();
+                } else {
+                    $challenges = DB::table('challenges')->where('in_leader_board', 1)->orderByDesc('points')->take(15)->get();
                 }
 
-                    return $this->returnData('challenges' , $challenges);
 
+                if (!$challenges) {
+                    return $this->returnError('', 'page not found');
+                }
+
+                return $this->returnData('challenges', $challenges);
             } catch (\Throwable $th) {
                 return $th->getMessage();
             }
         }
     }
 
-    private function choosingTheChallengeTime(){
+    private function choosingTheChallengeTime()
+    {
         $date = date('m');
 
-        if($date <= 2){
-            return date('Y-m-d' , strtotime(date('Y').'-2-1'));
-        }else
-        if($date <= 5){
-            return date('Y-m-d' , strtotime(date('Y').'-5-1'));
+        if ($date <= 2) {
+            return date('Y-m-d', strtotime(date('Y') . '-2-1'));
+        } else
+        if ($date <= 5) {
+            return date('Y-m-d', strtotime(date('Y') . '-5-1'));
         }
-        if($date <= 8){
-            return date('Y-m-d' , strtotime(date('Y').'-8-1'));
+        if ($date <= 8) {
+            return date('Y-m-d', strtotime(date('Y') . '-8-1'));
         }
-        if($date <= 11){
-            return date('Y-m-d' , strtotime(date('Y').'-11-1'));
+        if ($date <= 11) {
+            return date('Y-m-d', strtotime(date('Y') . '-11-1'));
         }
     }
 }

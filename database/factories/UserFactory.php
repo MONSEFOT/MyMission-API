@@ -24,9 +24,12 @@ class UserFactory extends Factory
     {
         return [
             'display_name' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
-            'password' => $this->faker->password(), // password
-            'role' => $this->faker->word(),
+            'social_id' => $this->faker->unique()->safeEmail,
+            'password' => $this->faker->password(),
+            'role' => "hero",
+            'is_banned' => false,
+            'created_at' =>  date("Y-m-d H:m:s"),
+            'updated_at' => date("Y-m-d H:m:s"),
         ];
     }
 }

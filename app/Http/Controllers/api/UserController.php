@@ -251,7 +251,7 @@ class UserController extends Controller
         $rules = [
             'display_name' => 'string',
             'with_social_id' => 'required|boolean',
-            'social_id' => 'integer',
+            'social_id' => 'string',
         ];
 
 
@@ -262,7 +262,7 @@ class UserController extends Controller
         } else {
             $inputs = $request->input();
             try {
-                if($inputs['with_social_id'] == "true"){
+                if($inputs['with_social_id']){
                     $users = DB::table('users')->where('social_id', $inputs['social_id'])->get();
                 }
                 else{
